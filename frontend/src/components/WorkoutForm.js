@@ -8,6 +8,7 @@ const WorkoutForm = () => {
   const [load, setLoad] = useState("");
   const [reps, setReps] = useState("");
   const [error, setError] = useState(null);
+  const [emptyFields, setEmptyFields] = useState([]);
 
   const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,6 +30,8 @@ const WorkoutForm = () => {
 
         if(!response.ok) {
             setError(json.error)
+            //If field is missing the response will be => emptyFields = ['title', 'reps']
+            setEmptyFields(json.emptyFields)
         } 
         if(response.ok) {
             //cleaning the input fields and variables associated with them.
@@ -36,6 +39,8 @@ const WorkoutForm = () => {
             setLoad('')
             setReps('')
             setError(null)
+            //so there isn't any empty field, and in case there was any from before, we give back emptyFields.length = 0
+            setEmptyFields([]);
             console.log('new workout added', json)
             //When the response is 200 we update the global state by passing to it the new workout object
             //Also by sending the new one to the database, the json object on home page (inside the useEffect) will change
@@ -53,18 +58,22 @@ const WorkoutForm = () => {
         onChange={(e) => setTitle(e.target.value)}
         //sets the value of the input field to the value stored in the load variable. 
         value={title}
+        //If there is any error on this input field, it will turn red as is styled on the css class
+        className={emptyFields.includes('title') ? 'error' : ''}
       />
 
       <label>Load (kg):</label>
       <input type="number" 
              onChange={(e) => setLoad(e.target.value)}
              value={load} 
+             className={emptyFields.includes('load') ? 'error' : ''}
        />
 
       <label>Reps:</label>
       <input type="number" 
              onChange={(e) => setReps(e.target.value)}
              value={reps} 
+             className={emptyFields.includes('reps') ? 'error' : ''}
        />
 
     <button>Add Workout</button>

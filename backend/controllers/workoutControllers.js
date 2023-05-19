@@ -43,6 +43,16 @@ const getWorkout = async (req, res) => {
 const createWorkout = async (req, res) => {
   const {title, load, reps} = req.body
 
+  // * Handeling errors when empty fields
+  let emptyFields = [];
+  if(!title) emptyFields.push('title');
+  if(!load) emptyFields.push('load');
+  if(!reps) emptyFields.push('reps');
+  //* If there is a missing field, the code will STOP here, so it will return a property called emptyFields (an array)
+  if(emptyFields.length > 0 ) {
+    return res.status(400).json({error: 'Please fill all the fieds', emptyFields})
+  }
+
   // add to the database
   try {
     const workout = await Workout.create({ title, load, reps })
