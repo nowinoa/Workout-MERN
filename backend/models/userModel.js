@@ -23,14 +23,10 @@ const userSchema = new Schema({
 })
 
 //* Creating a STATIC signup method
+// it is a method that we create by ourselves and you can access to it for using like:
 // User.signup(); 
 userSchema.statics.signup = async function(email, password) {
 // * Validating inputs
-  // const exists = await this.findOne({ email })
-  // if (exists) {
-  //   throw Error('Email already in use')
-  // }
-
   if(!email || !password) {
     throw Error('All fields must be filled')
   }
@@ -43,6 +39,11 @@ userSchema.statics.signup = async function(email, password) {
     throw Error('Password is not strong enough')
   }
 
+  const exists = await this.findOne({ email })
+  if (exists) {
+    throw Error('Email already in use')
+  }
+
 //bcrypt forces us to use a salt -> an extra ramdon string to the user password (each of them is a unique code)
     //await-> this takes a time to be complete
     //the number reflects the legth of the string
@@ -52,6 +53,26 @@ userSchema.statics.signup = async function(email, password) {
 //after checking that the email is unique and the password is protected we create a new file with those values
   const user = await this.create({ email, password: hash })
 
+  return user
+}
+
+//* Creating a STATIC signup method
+userSchema.statics.login = async function(email, password) {
+  if(!email || !password) {
+    throw Error('All fields must be filled')
+  }
+  //find the user by email
+  const user = await this.findOne({ email })
+  if (!user) {
+    throw Error('Incorrect email')
+  }
+  //this method provided by bcrypt compares the given password (now empty) with the password asociated to this user on db
+  const match = await bcrypt.compare(password, user.password); //returns true or false
+
+  if(!match){
+    throw Error('Incorrect password');
+  }
+  //if the password matchs then return the user
   return user
 }
 //exporting this schema as a model so everytime you want to use it you can access by User

@@ -18,12 +18,28 @@ const createToken = (_id) => {
   //* Token
   return jwt.sign({_id}, process.env.SECRET, { expiresIn: '3d' })
 }
-// login a user
+//* login a user --> we need to check if the email and password exist on db and if it match we create a token and send it back to the client (authoritation to get in)
 const loginUser = async (req, res) => {
-  res.json({mssg: 'login user'})
+  const {email, password} = req.body;
+
+  try {
+    //the login method checks if email exist on the db, after checks if the password matchs with the one asociated to the email on db, and returns the user credentials
+    const user = await User.login(email, password)
+
+    // * Create a token for the user id from db
+    const token = createToken(user._id);
+
+    res.status(200).json({email, token});
+    
+  } catch (error) {
+    //credentials not found
+     res.status(400).json({error: error.message})
+  }
+
+
 }
 
-// signup a user
+//* signup a user --> storing user information and assigning a token
 const signupUser = async (req, res) => {
      //From the request body (the form sends to the backend) get those values
   const {email, password} = req.body
